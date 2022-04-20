@@ -61,3 +61,31 @@ class ChestXRayDataset(torch.utils.data.Dataset):
             image = Image.open(image_path).convert('RGB')
             return self.transform(image), self.class_names.index(class_name)
         
+train_transform = torchvision.transforms.Compose([
+    torchvision.transforms.Resize(size=(224, 224)),
+    torchvision.transforms.RandomHorizontalFlip(),
+    torchvision.transforms.ToTensor(),
+    torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+
+test_transform = torchvision.transforms.Compose([
+    torchvision.transforms.Resize(size=(224, 224)),
+    torchvision.transforms.ToTensor(),
+    torchvision.transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+])
+
+train_dirs = {
+    'normal': 'COVID-19 Radiography Database/normal',
+    'viral': 'COVID-19 Radiography Database/viral',
+    'covid': 'COVID-19 Radiography Database/covid'
+}
+
+train_dataset = ChestXRayDataset(train_dirs, train_transform)
+
+test_dirs = {
+    'normal': 'COVID-19 Radiography Database/test/normal',
+    'viral': 'COVID-19 Radiography Database/test/viral',
+    'covid': 'COVID-19 Radiography Database/test/covid'
+}
+
+test_dataset = ChestXRayDataset(test_dirs, test_transform)
