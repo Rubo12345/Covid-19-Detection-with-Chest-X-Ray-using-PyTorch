@@ -6,13 +6,15 @@ import random
 import torchvision
 from PIL import Image
 from matplotlib import pyplot as plt
+import sys
+sys.path.append('/home/rutu/Guided Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive')
 
 torch.manual_seed(0)
 print('Using Pytorch version',torch.__version__)
 
 class_names = ['normal', 'viral', 'covid']
-root_dir = 'COVID-19 Radiography Database'
-source_dirs = ['NORMAL', 'Viral Pneumonia', 'COVID-19']
+root_dir = 'COVID-19_Radiography_Database'
+source_dirs = ['Normal', 'Viral Pneumonia', 'COVID-19']
 
 if os.path.isdir(os.path.join(root_dir, source_dirs[1])):
     os.mkdir(os.path.join(root_dir, 'test'))
@@ -32,34 +34,33 @@ if os.path.isdir(os.path.join(root_dir, source_dirs[1])):
             shutil.move(source_path, target_path)
 
 class ChestXRayDataset(torch.utils.data.Dataset):
-    class ChestXRayDataset(torch.utils.data.Dataset):
-        def __init__(self, image_dirs, transform):
-            def get_images(class_name):
-                images = [x for x in os.listdir(image_dirs[class_name]) if x[-3:].lower().endswith('png')]
-                print(f'Found {len(images)} {class_name} examples')
-                return images
-            
-            self.images = {}
-            self.class_names = ['normal', 'viral', 'covid']
-            
-            for class_name in self.class_names:
-                self.images[class_name] = get_images(class_name)
-                
-            self.image_dirs = image_dirs
-            self.transform = transform
-            
+    def __init__(self, image_dirs, transform):
+        def get_images(class_name):
+            images = [x for x in os.listdir(image_dirs[class_name]) if x[-3:].lower().endswith('png')]
+            print(f'Found {len(images)} {class_name} examples')
+            return images
         
-        def __len__(self):
-            return sum([len(self.images[class_name]) for class_name in self.class_names])
+        self.images = {}
+        self.class_names = ['normal', 'viral', 'covid']
         
+        for class_name in self.class_names:
+            self.images[class_name] = get_images(class_name)
+            
+        self.image_dirs = image_dirs
+        self.transform = transform
         
-        def __getitem__(self, index):
-            class_name = random.choice(self.class_names)
-            index = index % len(self.images[class_name])
-            image_name = self.images[class_name][index]
-            image_path = os.path.join(self.image_dirs[class_name], image_name)
-            image = Image.open(image_path).convert('RGB')
-            return self.transform(image), self.class_names.index(class_name)
+    
+    def __len__(self):
+        return sum([len(self.images[class_name]) for class_name in self.class_names])
+    
+    
+    def __getitem__(self, index):
+        class_name = random.choice(self.class_names)
+        index = index % len(self.images[class_name])
+        image_name = self.images[class_name][index]
+        image_path = os.path.join(self.image_dirs[class_name], image_name)
+        image = Image.open(image_path).convert('RGB')
+        return self.transform(image), self.class_names.index(class_name)
         
 train_transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize(size=(224, 224)),
@@ -75,16 +76,16 @@ test_transform = torchvision.transforms.Compose([
 ])
 
 train_dirs = {
-    'normal': 'COVID-19 Radiography Database/normal',
-    'viral': 'COVID-19 Radiography Database/viral',
-    'covid': 'COVID-19 Radiography Database/covid'
+    'normal': 'COVID-19_Radiography_Database/Normal',
+    'viral': 'COVID-19_Radiography_Database/Viral',
+    'covid': 'COVID-19_Radiography_Database/Covid'
 }
 train_dataset = ChestXRayDataset(train_dirs, train_transform)
 
 test_dirs = {
-    'normal': 'COVID-19 Radiography Database/test/normal',
-    'viral': 'COVID-19 Radiography Database/test/viral',
-    'covid': 'COVID-19 Radiography Database/test/covid'
+    'normal': 'COVID-19_Radiography_Database/test/Normal',
+    'viral': 'COVID-19_Radiography_Database/test/Viral',
+    'covid': 'COVID-19_Radiography_Database/test/Covid'
 }
 test_dataset = ChestXRayDataset(test_dirs, test_transform)
 
@@ -94,7 +95,6 @@ dl_test = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuff
 
 print('Number of training batches', len(dl_train))
 print('Number of test batches', len(dl_test))
-
 
 class_names = train_dataset.class_names
 def show_images(images, labels, preds):
@@ -121,8 +121,6 @@ show_images(images, labels, labels)
 
 images, labels = next(iter(dl_test))
 show_images(images, labels, labels)
-
-
 
 resnet18 = torchvision.models.resnet18(pretrained=True)
 print(resnet18)
@@ -189,7 +187,6 @@ def train(epochs):
 
         print(f'Training Loss: {train_loss:.4f}')
     print('Training complete..')
-
 
 train(epochs=1)
 show_preds()
