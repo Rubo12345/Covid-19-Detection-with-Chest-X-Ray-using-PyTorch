@@ -14,7 +14,7 @@ print('Using Pytorch version',torch.__version__)
 
 class_names = ['normal', 'viral', 'covid']
 root_dir = 'COVID-19_Radiography_Database'
-source_dirs = ['Normal', 'Viral Pneumonia', 'COVID-19']
+source_dirs = ['Normal', 'Viral Pneumonia', 'COVID']
 
 if os.path.isdir(os.path.join(root_dir, source_dirs[1])):
     os.mkdir(os.path.join(root_dir, 'test'))
@@ -49,10 +49,8 @@ class ChestXRayDataset(torch.utils.data.Dataset):
         self.image_dirs = image_dirs
         self.transform = transform
         
-    
     def __len__(self):
         return sum([len(self.images[class_name]) for class_name in self.class_names])
-    
     
     def __getitem__(self, index):
         class_name = random.choice(self.class_names)
@@ -76,16 +74,16 @@ test_transform = torchvision.transforms.Compose([
 ])
 
 train_dirs = {
-    'normal': 'COVID-19_Radiography_Database/Normal',
-    'viral': 'COVID-19_Radiography_Database/Viral',
-    'covid': 'COVID-19_Radiography_Database/Covid'
+    'normal': 'COVID-19_Radiography_Database/normal/images',
+    'viral': 'COVID-19_Radiography_Database/viral/images',
+    'covid': 'COVID-19_Radiography_Database/covid/images'
 }
 train_dataset = ChestXRayDataset(train_dirs, train_transform)
 
 test_dirs = {
-    'normal': 'COVID-19_Radiography_Database/test/Normal',
-    'viral': 'COVID-19_Radiography_Database/test/Viral',
-    'covid': 'COVID-19_Radiography_Database/test/Covid'
+    'normal': 'COVID-19_Radiography_Database/test/normal/images',
+    'viral': 'COVID-19_Radiography_Database/test/viral/images',
+    'covid': 'COVID-19_Radiography_Database/test/covid/images'
 }
 test_dataset = ChestXRayDataset(test_dirs, test_transform)
 
@@ -110,7 +108,7 @@ def show_images(images, labels, preds):
         col = 'green'
         if preds[i] != labels[i]:
             col = 'red'
-            
+  
         plt.xlabel(f'{class_names[int(labels[i].numpy())]}')
         plt.ylabel(f'{class_names[int(preds[i].numpy())]}', color=col)
     plt.tight_layout()
@@ -188,5 +186,5 @@ def train(epochs):
         print(f'Training Loss: {train_loss:.4f}')
     print('Training complete..')
 
-train(epochs=1)
+# train(epochs=1)
 show_preds()
