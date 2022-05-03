@@ -7,10 +7,10 @@ import torchvision
 from PIL import Image
 from matplotlib import pyplot as plt
 import sys
-sys.path.append('/home/rutu/Guided Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive')
+sys.path.append('/home/rutu/Guided_Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive/')
 
 torch.manual_seed(0)
-print('Using Pytorch version',torch.__version__)
+# print('Using Pytorch version',torch.__version__)
 
 class_names = ['normal', 'viral', 'covid']
 root_dir = 'COVID-19_Radiography_Database'
@@ -36,8 +36,10 @@ if os.path.isdir(os.path.join(root_dir, source_dirs[1])):
 class ChestXRayDataset(torch.utils.data.Dataset):
     def __init__(self, image_dirs, transform):
         def get_images(class_name):
+            # print(os.listdir(image_dirs[class_name]))
             images = [x for x in os.listdir(image_dirs[class_name]) if x[-3:].lower().endswith('png')]
-            print(f'Found {len(images)} {class_name} examples')
+            # print(f'Found {len(images)} {class_name} examples')
+            # print(images)
             return images
         
         self.images = {}
@@ -74,16 +76,16 @@ test_transform = torchvision.transforms.Compose([
 ])
 
 train_dirs = {
-    'normal': 'COVID-19_Radiography_Database/normal/images',
-    'viral': 'COVID-19_Radiography_Database/viral/images',
-    'covid': 'COVID-19_Radiography_Database/covid/images'
+    'normal': 'archive/COVID-19_Radiography_Database/normal/images/',
+    'viral': 'archive/COVID-19_Radiography_Database/viral/images/',
+    'covid': 'archive/COVID-19_Radiography_Database/covid/images/'
 }
 train_dataset = ChestXRayDataset(train_dirs, train_transform)
 
 test_dirs = {
-    'normal': 'COVID-19_Radiography_Database/test/normal/images',
-    'viral': 'COVID-19_Radiography_Database/test/viral/images',
-    'covid': 'COVID-19_Radiography_Database/test/covid/images'
+    'normal': 'archive/COVID-19_Radiography_Database/test/normal/',
+    'viral': 'archive/COVID-19_Radiography_Database/test/viral/',
+    'covid': 'archive/COVID-19_Radiography_Database/test/covid/'
 }
 test_dataset = ChestXRayDataset(test_dirs, test_transform)
 
@@ -91,8 +93,8 @@ batch_size = 6
 dl_train = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 dl_test = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-print('Number of training batches', len(dl_train))
-print('Number of test batches', len(dl_test))
+# print('Number of training batches', len(dl_train))
+# print('Number of test batches', len(dl_test))
 
 class_names = train_dataset.class_names
 def show_images(images, labels, preds):
@@ -108,7 +110,6 @@ def show_images(images, labels, preds):
         col = 'green'
         if preds[i] != labels[i]:
             col = 'red'
-  
         plt.xlabel(f'{class_names[int(labels[i].numpy())]}')
         plt.ylabel(f'{class_names[int(preds[i].numpy())]}', color=col)
     plt.tight_layout()
@@ -121,7 +122,6 @@ images, labels = next(iter(dl_test))
 show_images(images, labels, labels)
 
 resnet18 = torchvision.models.resnet18(pretrained=True)
-print(resnet18)
 resnet18.fc = torch.nn.Linear(in_features=512, out_features=3)
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet18.parameters(), lr=3e-5)
@@ -132,8 +132,7 @@ def show_preds():
     outputs = resnet18(images)
     _, preds = torch.max(outputs, 1)
     show_images(images, labels, preds)
-
-show_preds()
+# show_preds()
 
 def train(epochs):
     print('Starting training..')
@@ -156,9 +155,7 @@ def train(epochs):
             train_loss += loss.item()
             if train_step % 20 == 0:
                 print('Evaluating at step', train_step)
-
                 accuracy = 0
-
                 resnet18.eval() # set model to eval phase
 
                 for val_step, (images, labels) in enumerate(dl_test):
@@ -186,5 +183,5 @@ def train(epochs):
         print(f'Training Loss: {train_loss:.4f}')
     print('Training complete..')
 
-# train(epochs=1)
-show_preds()
+train(epochs=1)
+# show_preds()
