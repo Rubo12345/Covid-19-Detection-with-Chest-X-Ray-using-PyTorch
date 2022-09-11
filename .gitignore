@@ -5,6 +5,7 @@ archive/*
 
 # Ignore Filename Extensions
 *.png
+*.xlsx
 
 # VSCode
 .vscode/*
