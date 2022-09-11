@@ -15,6 +15,7 @@ Dataset: [Chest X-Ray Radiography Dataset](https://www.kaggle.com/datasets/tawsi
 8. Final Results (predictions)
 
 Hyperparameters:
+
 Optimizer : Adams Optimizer
 
 Learning Rate : 3e-5
