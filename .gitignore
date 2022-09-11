@@ -4,9 +4,6 @@
 archive/*
 
 # Ignore Filename Extensions
-*.pyc
-*.ckpt
-*.pth
 *.png
 
 # VSCode
