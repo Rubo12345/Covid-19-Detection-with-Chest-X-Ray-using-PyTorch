@@ -7,6 +7,7 @@ import torchvision
 from PIL import Image
 from matplotlib import pyplot as plt
 import sys
+import pandas as pd
 sys.path.append('/home/rutu/Guided_Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive/')
 
 torch.manual_seed(0)
@@ -116,12 +117,12 @@ def show_images(images, labels, preds):
     plt.show()
 
 images, labels = next(iter(dl_train))
-show_images(images, labels, labels)
+# show_images(images, labels, labels)
 
 images, labels = next(iter(dl_test))
-show_images(images, labels, labels)
+# show_images(images, labels, labels)
 
-resnet18 = torchvision.models.resnet18(pretrained=True)
+resnet18 = torchvision.models.resnet18(pretrained=False)   #With/Without pretrained weights
 resnet18.fc = torch.nn.Linear(in_features=512, out_features=3)
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet18.parameters(), lr=3e-5)
@@ -129,18 +130,26 @@ optimizer = torch.optim.Adam(resnet18.parameters(), lr=3e-5)
 def show_preds():
     resnet18.eval()
     images, labels = next(iter(dl_test))
+    print(images.shape)
     outputs = resnet18(images)
+    print(outputs.shape)
     _, preds = torch.max(outputs, 1)
     show_images(images, labels, preds)
 # show_preds()
 
 def train(epochs):
     print('Starting training..')
+    Valid_Loss = []
+    Train_Loss = []
+    Accuracy = []
+    VL = "Validation Loss"
+    ACC = "Accuracy"
+    TL = "Train Loss"
     for e in range(0, epochs):
         print('='*20)
         print(f'Starting epoch {e + 1}/{epochs}')
         print('='*20)
-
+    
         train_loss = 0.
         val_loss = 0.
 
@@ -168,20 +177,28 @@ def train(epochs):
 
                 val_loss /= (val_step + 1)
                 accuracy = accuracy/len(test_dataset)
+                accuracy = 100*accuracy
+                Accuracy.append(accuracy)
+                Valid_Loss.append(val_loss)
+
                 print(f'Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}')
 
-                show_preds()
+                # show_preds()
 
                 resnet18.train()
 
-                if accuracy >= 0.95:
-                    print('Performance condition satisfied, stopping..')
-                    return
+                # if accuracy >= 0.95:
+                #     print('Performance condition satisfied, stopping..')
+                #     return
 
         train_loss /= (train_step + 1)
-
+        Train_Loss.append(train_loss)
         print(f'Training Loss: {train_loss:.4f}')
     print('Training complete..')
+    data = pd.DataFrame({VL:Valid_Loss,ACC:Accuracy})
+    data.to_excel('Loss_and_Acc.xlsx',sheet_name = 'Losses and Accuracy', index = True)
+    data2 = pd.DataFrame({TL : Train_Loss})
+    data2.to_excel('Tr_Loss.xlsx',sheet_name = 'Train Loss', index = True)
 
-train(epochs=1)
+train(epochs=10)
 # show_preds()
