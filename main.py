@@ -8,6 +8,8 @@ from PIL import Image
 from matplotlib import pyplot as plt
 import sys
 import pandas as pd
+
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 sys.path.append('/home/rutu/Guided_Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive/')
 
 torch.manual_seed(0)
@@ -90,7 +92,7 @@ test_dirs = {
 }
 test_dataset = ChestXRayDataset(test_dirs, test_transform)
 
-batch_size = 6
+batch_size = 28
 dl_train = torch.utils.data.DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 dl_test = torch.utils.data.DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
@@ -124,6 +126,7 @@ images, labels = next(iter(dl_test))
 
 resnet18 = torchvision.models.resnet18(pretrained=False)   #With/Without pretrained weights
 resnet18.fc = torch.nn.Linear(in_features=512, out_features=3)
+resnet18.to(device)
 loss_fn = torch.nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(resnet18.parameters(), lr=3e-5)
 
@@ -157,31 +160,36 @@ def train(epochs):
 
         for train_step, (images, labels) in enumerate(dl_train):
             optimizer.zero_grad()
-            outputs = resnet18(images)
-            loss = loss_fn(outputs, labels)
+            image = images.to(device)
+            label = labels.to(device)
+            outputs = resnet18(image)
+            loss = loss_fn(outputs, label)
             loss.backward()
             optimizer.step()
             train_loss += loss.item()
             if train_step % 20 == 0:
                 print('Evaluating at step', train_step)
                 accuracy = 0
+                correct = 0
                 resnet18.eval() # set model to eval phase
 
                 for val_step, (images, labels) in enumerate(dl_test):
-                    outputs = resnet18(images)
-                    loss = loss_fn(outputs, labels)
+                    image = images.to(device)
+                    label = labels.to(device)
+                    outputs = resnet18(image)
+                    loss = loss_fn(outputs, label)
                     val_loss += loss.item()
 
                     _, preds = torch.max(outputs, 1)
-                    accuracy += sum((preds == labels).numpy())
-
+                    correct += (preds == label).sum().item()
+                accuracy = 100 * correct / len(test_dataset)
                 val_loss /= (val_step + 1)
-                accuracy = accuracy/len(test_dataset)
-                accuracy = 100*accuracy
+                # accuracy = accuracy/len(test_dataset)
+                # accuracy = 100*accuracy
                 Accuracy.append(accuracy)
                 Valid_Loss.append(val_loss)
 
-                print(f'Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}')
+                print(f'Epoch: {e+1},Validation Loss: {val_loss:.4f}, Accuracy: {accuracy:.4f}')
 
                 # show_preds()
 
