@@ -13,3 +13,12 @@ Dataset: [Chest X-Ray Radiography Dataset](https://www.kaggle.com/datasets/tawsi
 6. Creating the Model (resnet18 - pretrained)
 7. Training the Model (training the model until we get 95% accuracy)
 8. Final Results (predictions)
+
+Hyperparameters:
+Optimizer : Adams Optimizer
+
+Learning Rate : 3e-5
+
+Betas = (0.9,0.999)
+
+Batch Size – 28
