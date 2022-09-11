@@ -1,7 +1,7 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 # Custom Folder Ignore
-/home/rutu/Guided_Projects/Covid-19-Detection-with-Chest-X-Ray-using-PyTorch/archive
+archive/*
 
 # Ignore Filename Extensions
 *.pyc
