@@ -16,10 +16,10 @@ Dataset: [Chest X-Ray Radiography Dataset](https://www.kaggle.com/datasets/tawsi
 
 Hyperparameters:
 
-Optimizer : Adams Optimizer
+  Optimizer : Adams Optimizer
 
-Learning Rate : 3e-5
+  Learning Rate : 3e-5
 
-Betas = (0.9,0.999)
+  Betas = (0.9,0.999)
 
-Batch Size – 28
+  Batch Size – 28
